@@ -6,10 +6,12 @@ Atomic Boolean library for Go, optimized for performance yet simple to use.
 
 Use this for cleaner code.
 
+Froked from [github.com/tevino/abool](github.com/tevino/abool).
+
 ## Usage
 
 ```go
-import "github.com/tevino/abool"
+import "github.com/barryz/abool"
 
 cond := abool.New()  // default to false
 
@@ -28,8 +30,8 @@ type Foo struct {
 
 ## Benchmark:
 
-- Go 1.6.2
-- OS X 10.11.4
+- Go 1.11.0
+- OS X 10.12.2
 
 ```shell
 # Read
