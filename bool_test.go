@@ -49,12 +49,27 @@ func TestBool(t *testing.T) {
 	if set := v.SetToIf(false, true); !set || !v.IsSet() {
 		t.Fatal("AtomicBool.SetTo(false, true) failed")
 	}
+
+	v = New()
+	if v.IsSet() {
+		t.Fatal("Empty value of AtomicBool should be false")
+	}
+
+	_ = v.Toggle()
+	if !v.IsSet() {
+		t.Fatal("AtomicBool.Toggle() to true failed")
+	}
+
+	prev := v.Toggle()
+	if v.IsSet() == prev.IsSet() {
+		t.Fatal("AtomicBool.Toggle() to false failed")
+	}
 }
 
 func TestRace(t *testing.T) {
 	repeat := 10000
 	var wg sync.WaitGroup
-	wg.Add(repeat * 3)
+	wg.Add(repeat * 4)
 	v := New()
 
 	// Writer
@@ -80,6 +95,15 @@ func TestRace(t *testing.T) {
 			wg.Done()
 		}
 	}()
+
+	// Reader And Writer
+	go func() {
+		for i := 0; i < repeat; i++ {
+			v.Toggle()
+			wg.Done()
+		}
+	}()
+
 	wg.Wait()
 }
 
@@ -89,6 +113,7 @@ func ExampleAtomicBool() {
 	cond.IsSet()     // returns true
 	cond.UnSet()     // set to false
 	cond.SetTo(true) // set to whatever you want
+	cond.Toggle()    // toggles the boolean value
 }
 
 // Benchmark Read
@@ -172,5 +197,27 @@ func BenchmarkAtomicBoolCAS(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		v.SetToIf(false, true)
+	}
+}
+
+// Benchmark toggle boolean value
+
+func BenchmarkMutexToggle(b *testing.B) {
+	var m sync.RWMutex
+	var v bool
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		m.Lock()
+		v = !v
+		m.Unlock()
+	}
+	b.StopTimer()
+}
+
+func BenchmarkAtomicBoolToggle(b *testing.B) {
+	v := New()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		v.Toggle()
 	}
 }
