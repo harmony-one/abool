@@ -58,13 +58,8 @@ func (ab *AtomicBool) Toggle() bool {
 // SetToIf sets the Boolean to new only if the Boolean matches the old
 // Returns whether the set was done
 func (ab *AtomicBool) SetToIf(old, new bool) (set bool) {
-	var o, n int32
-	if old {
-		o = 1
-	}
-	if new {
-		n = 1
-	}
+	o := boolToInt(old)
+	n := boolToInt(new)
 	return atomic.CompareAndSwapInt32((*int32)(ab), o, n)
 }
 
