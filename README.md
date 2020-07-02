@@ -31,25 +31,26 @@ type Foo struct {
 
 ## Benchmark:
 
-- Go 1.11.5
-- OS X 10.14.5
+- Go 1.14.2
+- OS X 10.15.5
 
 ```shell
 # Read
-BenchmarkMutexRead-4            100000000               14.7 ns/op
-BenchmarkAtomicValueRead-4      2000000000               0.45 ns/op
-BenchmarkAtomicBoolRead-4       2000000000               0.35 ns/op  # <--- This package
+BenchmarkMutexRead-12                   100000000               11.0 ns/op
+BenchmarkAtomicValueRead-12             1000000000               0.253 ns/op
+BenchmarkAtomicBoolRead-12              1000000000               0.259 ns/op    # <--- This package
 
 # Write
-BenchmarkMutexWrite-4           100000000               14.5 ns/op
-BenchmarkAtomicValueWrite-4     100000000               10.5 ns/op
-BenchmarkAtomicBoolWrite-4      300000000                5.21 ns/op  # <--- This package
+BenchmarkMutexWrite-12                  100000000               10.8 ns/op
+BenchmarkAtomicValueWrite-12            132855918                9.12 ns/op
+BenchmarkAtomicBoolWrite-12             263941647                4.52 ns/op     # <--- This package
 
 # CAS
-BenchmarkMutexCAS-4             50000000                31.3 ns/op
-BenchmarkAtomicBoolCAS-4        200000000                7.18 ns/op  # <--- This package
+BenchmarkMutexCAS-12                    54871387                21.6 ns/op
+BenchmarkAtomicBoolCAS-12               267147930                4.50 ns/op     # <--- This package
 
 # Toggle
-BenchmarkMutexToggle-4          50000000                32.6 ns/op
-BenchmarkAtomicBoolToggle-4     300000000                5.21 ns/op  # <--- This package
+BenchmarkMutexToggle-12                 55389297                21.4 ns/op
+BenchmarkAtomicBoolToggle-12            145680895                8.32 ns/op     # <--- This package
+
 ```

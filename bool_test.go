@@ -55,54 +55,44 @@ func TestBool(t *testing.T) {
 		t.Fatal("Empty value of AtomicBool should be false")
 	}
 
-	_ = v.Toggle()
+	v.Toggle()
 	if !v.IsSet() {
 		t.Fatal("AtomicBool.Toggle() to true failed")
 	}
 
 	prev := v.Toggle()
-	if v.IsSet() == prev.IsSet() {
+	if v.IsSet() == prev {
 		t.Fatal("AtomicBool.Toggle() to false failed")
 	}
 }
 
 func TestRace(t *testing.T) {
+	v := New()
+	fs := []func() {
+		func() {v.IsSet()},
+		v.Set,
+		v.UnSet,
+		func() {v.Toggle()},
+		func() {v.SetToIf(true, false)},
+		func() {v.SetToIf(false, true)},
+		func() {v.SetTo(true)},
+		func() {v.SetTo(false)},
+	}
+	grPerFunc := 10
 	repeat := 10000
 	var wg sync.WaitGroup
-	wg.Add(repeat * 4)
-	v := New()
+	wg.Add(grPerFunc * len(fs))
 
-	// Writer
-	go func() {
-		for i := 0; i < repeat; i++ {
-			v.Set()
-			wg.Done()
+	for _, f := range fs {
+		for grIndex := 0; grIndex != grPerFunc; grIndex++{
+			go func(testFunc func()) {
+				for i := 0; i != repeat; i++ {
+					testFunc()
+				}
+				wg.Done()
+			}(f)
 		}
-	}()
-
-	// Reader
-	go func() {
-		for i := 0; i < repeat; i++ {
-			v.IsSet()
-			wg.Done()
-		}
-	}()
-
-	// Writer
-	go func() {
-		for i := 0; i < repeat; i++ {
-			v.UnSet()
-			wg.Done()
-		}
-	}()
-
-	// Reader And Writer
-	go func() {
-		for i := 0; i < repeat; i++ {
-			v.Toggle()
-			wg.Done()
-		}
-	}()
+	}
 
 	wg.Wait()
 }
@@ -177,7 +167,6 @@ func BenchmarkAtomicBoolWrite(b *testing.B) {
 }
 
 // Benchmark CAS
-
 func BenchmarkMutexCAS(b *testing.B) {
 	var m sync.RWMutex
 	var v bool
