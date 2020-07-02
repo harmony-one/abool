@@ -48,9 +48,9 @@ func (ab *AtomicBool) SetTo(yes bool) {
 // Toggle negates boolean atomically and returns the previous boolean value.
 func (ab *AtomicBool) Toggle() bool {
 	for {
-		old := ab.IsSet()
-		if ab.SetToIf(old, !old) {
-			return old
+		old := atomic.LoadInt32((*int32)(ab))
+		if atomic.CompareAndSwapInt32((*int32)(ab), old, toggleInt(old)) {
+			return old == 1
 		}
 	}
 }
@@ -78,8 +78,13 @@ func boolToInt(b bool) int32 {
 
 // intToBool convert a int32 to boolean
 func intToBool(i int32) bool {
+	return i == 1
+}
+
+// toggleInt toggles the int32
+func toggleInt(i int32) int32 {
 	if i == 1 {
-		return true
+		return 0
 	}
-	return false
+	return 1
 }
