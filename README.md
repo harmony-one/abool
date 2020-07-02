@@ -35,7 +35,6 @@ type Foo struct {
 - OS X 10.15.5
 
 ```shell
-1 ns/op  
 # Read
 BenchmarkMutexRead-12                   100000000               11.0 ns/op
 BenchmarkAtomicValueRead-12             1000000000               0.253 ns/op
